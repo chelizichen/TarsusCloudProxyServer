@@ -7,17 +7,16 @@ import (
 	"log"
 )
 
-const (
-	host     = "localhost"
-	port     = 3306
-	user     = "root"
-	password = "123456"
-	dbname   = "serverless"
-)
-
 var DB *sql.DB
 
 func InitDB() {
+	const (
+		host     = "localhost"
+		port     = 3306
+		user     = "root"
+		password = "123456"
+		dbname   = "serverless"
+	)
 	mysqlInfo := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s",
 		user, password, host, port, dbname)
 

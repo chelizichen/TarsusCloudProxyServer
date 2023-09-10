@@ -8,13 +8,15 @@ import (
 	"io"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 func main() {
 	monitor.InitDB()
 	defer monitor.DB.Close()
 
-	http.HandleFunc("/", handler)
+	http.HandleFunc("/proxy/", handler)
+	http.HandleFunc("/performance", monitor.PerformanceAnalyse)
 	http.ListenAndServe(":3402", nil)
 }
 
@@ -30,14 +32,14 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Missing target port", http.StatusBadRequest)
 		return
 	}
-
+	targetPath := strings.Replace(r.URL.String(), "/proxy/", "/", 1)
 	port, err := strconv.Atoi(targetPort)
 	if err != nil {
 		http.Error(w, "target port is not a number", 400)
 		return
 	}
 
-	url := fmt.Sprintf("http://127.0.0.1:%s%s", targetPort, r.URL.Path)
+	url := fmt.Sprintf("http://127.0.0.1:%s%s", targetPort, targetPath)
 	body, _ := io.ReadAll(r.Body)
 	log, respBody, secs, startTime, err := request.Fetch(url, body)
 	requestBody := string(body)
@@ -53,6 +55,6 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Println(log)
 
-	monitor.LoggerPerformance(port, startTime, secs, requestBody, r.URL.String(), len(respBody), 200)
+	monitor.LoggerPerformance(port, startTime, secs, requestBody, targetPath, len(respBody), 200)
 
 }
