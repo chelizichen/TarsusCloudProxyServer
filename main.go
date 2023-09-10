@@ -7,6 +7,7 @@ import (
 	"golang.org/x/time/rate"
 	"io"
 	"net/http"
+	"strconv"
 )
 
 func main() {
@@ -30,6 +31,12 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	port, err := strconv.Atoi(targetPort)
+	if err != nil {
+		http.Error(w, "target port is not a number", 400)
+		return
+	}
+
 	url := fmt.Sprintf("http://127.0.0.1:%s%s", targetPort, r.URL.Path)
 	body, _ := io.ReadAll(r.Body)
 	log, respBody, secs, startTime, err := request.Fetch(url, body)
@@ -45,6 +52,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Println(log)
-	monitor.LoggerPerformance(8080, startTime, secs, requestBody, r.URL.String(), len(respBody), 200)
+
+	monitor.LoggerPerformance(port, startTime, secs, requestBody, r.URL.String(), len(respBody), 200)
 
 }
