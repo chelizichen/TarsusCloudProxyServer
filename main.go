@@ -17,6 +17,7 @@ func main() {
 
 	http.HandleFunc("/proxy/", handler)
 	http.HandleFunc("/performance", monitor.PerformanceAnalyse)
+	http.HandleFunc("/apicalls", monitor.ApiCalls)
 	http.ListenAndServe(":3402", nil)
 }
 
